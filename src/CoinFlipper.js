@@ -1,60 +1,59 @@
 import React, { Component } from 'react'
 import CoinImage from './CoinImage'
+import { choice } from './helpers'
 
 class CoinFlipper extends Component {
   static defaultProps = {
     title: 'Lotto',
     numBalls: 6,
-    maxNum: 40
+    maxNum: 40,
+    coins: [
+      {
+        side: 'heads',
+        imgSrc: 'https://upload.wikimedia.org/wikipedia/commons/c/cd/S_Half_Dollar_Obverse_2016.jpg'
+      },
+      { side: 'tails', imgSrc: 'http://www.pcgscoinfacts.com/UserImages/71009269r.jpg' }
+    ]
   }
 
   constructor(props) {
     super(props)
     this.state = {
-      isCoinHeads: true,
-      headFlips: 0,
-      tailFlips: 0
+      currCoin: null,
+      nFlips: 0,
+      nHeads: 0,
+      nTails: 0
     }
     this.handleClick = this.handleClick.bind(this)
   }
 
-  flipTheCoin() {
-    const side = Math.floor(Math.random() * 2)
-    if (side === 0) {
-      this.setState({
-        isCoinHeads: true
-      })
-
-      this.setState(curState => ({ headFlips: curState.headFlips + 1 }))
-    } else {
-      this.setState({
-        isCoinHeads: false
-      })
-      this.setState(curState => ({ tailFlips: curState.tailFlips + 1 }))
-    }
+  flipCoin() {
+    const newCoin = choice(this.props.coins)
+    this.setState(st => {
+      return {
+        currCoin: newCoin,
+        nFlips: st.nFlips + 1,
+        nHeads: st.nHeads + (newCoin.side === 'heads' ? 1 : 0),
+        nTails: st.nTails + (newCoin.side === 'tails' ? 1 : 0)
+      }
+    })
   }
 
-  handleClick() {
-    this.flipTheCoin()
+  handleClick(e) {
+    this.flipCoin()
   }
 
   render() {
     return (
-      <div>
-        <h1>Let's flip a coin</h1>
-        <CoinImage
-          image={
-            this.state.isCoinHeads
-              ? 'https://upload.wikimedia.org/wikipedia/commons/c/cd/S_Half_Dollar_Obverse_2016.jpg'
-              : 'http://www.pcgscoinfacts.com/UserImages/71009269r.jpg'
-          }
-        />
+      <div className='CoinFlipper'>
+        <h2>Let's flip a coin!</h2>
+        {this.state.currCoin && <CoinImage info={this.state.currCoin} />}
 
         <button onClick={this.handleClick}>FLIP ME!</button>
 
         <p>
-          Out of {this.state.headFlips + this.state.tailFlips} flips, there have been {this.state.headFlips}{' '}
-          heads and {this.state.tailFlips} tails.
+          Out of {this.state.nFlips} flips, there have been {this.state.nHeads} heads and {this.state.nTails}{' '}
+          tails.
         </p>
       </div>
     )
